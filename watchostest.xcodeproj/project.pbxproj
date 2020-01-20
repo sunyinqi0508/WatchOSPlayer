@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A991A13A23CD81FD001AB505 /* AikoPlus.otf in Resources */ = {isa = PBXBuildFile; fileRef = A991A13923CD81FD001AB505 /* AikoPlus.otf */; };
+		A991A13C23CD8211001AB505 /* AikoPlus.otf in Resources */ = {isa = PBXBuildFile; fileRef = A991A13923CD81FD001AB505 /* AikoPlus.otf */; };
 		A9E0BEB423C954D800098745 /* watchostest WatchKit App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = A9E0BEB323C954D800098745 /* watchostest WatchKit App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A9E0BEBA23C954D800098745 /* Interface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A9E0BEB823C954D800098745 /* Interface.storyboard */; };
 		A9E0BEBC23C954DE00098745 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A9E0BEBB23C954DE00098745 /* Assets.xcassets */; };
@@ -18,6 +20,7 @@
 		A9E0BED023C954DE00098745 /* NotificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9E0BECF23C954DE00098745 /* NotificationView.swift */; };
 		A9E0BED223C954E100098745 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A9E0BED123C954E100098745 /* Assets.xcassets */; };
 		A9E0BED523C954E100098745 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A9E0BED423C954E100098745 /* Preview Assets.xcassets */; };
+		A9E0BEE623CA80F100098745 /* MovieInterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9E0BEE523CA80F100098745 /* MovieInterfaceController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,6 +66,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A991A13923CD81FD001AB505 /* AikoPlus.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = AikoPlus.otf; sourceTree = "<group>"; };
 		A9E0BEAF23C954D700098745 /* watchostest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = watchostest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A9E0BEB323C954D800098745 /* watchostest WatchKit App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "watchostest WatchKit App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A9E0BEB923C954D800098745 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
@@ -78,6 +82,7 @@
 		A9E0BED423C954E100098745 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		A9E0BED623C954E100098745 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A9E0BED723C954E100098745 /* PushNotificationPayload.apns */ = {isa = PBXFileReference; lastKnownFileType = text; path = PushNotificationPayload.apns; sourceTree = "<group>"; };
+		A9E0BEE523CA80F100098745 /* MovieInterfaceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieInterfaceController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -123,6 +128,8 @@
 		A9E0BEC623C954DE00098745 /* watchostest WatchKit Extension */ = {
 			isa = PBXGroup;
 			children = (
+				A991A13923CD81FD001AB505 /* AikoPlus.otf */,
+				A9E0BEE523CA80F100098745 /* MovieInterfaceController.swift */,
 				A9E0BEC723C954DE00098745 /* ContentView.swift */,
 				A9E0BEC923C954DE00098745 /* HostingController.swift */,
 				A9E0BECB23C954DE00098745 /* ExtensionDelegate.swift */,
@@ -244,6 +251,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A991A13A23CD81FD001AB505 /* AikoPlus.otf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -260,6 +268,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A991A13C23CD8211001AB505 /* AikoPlus.otf in Resources */,
 				A9E0BED523C954E100098745 /* Preview Assets.xcassets in Resources */,
 				A9E0BED223C954E100098745 /* Assets.xcassets in Resources */,
 			);
@@ -276,6 +285,7 @@
 				A9E0BEC823C954DE00098745 /* ContentView.swift in Sources */,
 				A9E0BECE23C954DE00098745 /* NotificationController.swift in Sources */,
 				A9E0BECC23C954DE00098745 /* ExtensionDelegate.swift in Sources */,
+				A9E0BEE623CA80F100098745 /* MovieInterfaceController.swift in Sources */,
 				A9E0BED023C954DE00098745 /* NotificationView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -357,6 +367,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -404,12 +415,14 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = fast;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -425,6 +438,7 @@
 				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"watchostest WatchKit Extension/Preview Content\"";
+				DEVELOPMENT_TEAM = 7P35HLZ26U;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "watchostest WatchKit Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -448,6 +462,7 @@
 				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"watchostest WatchKit Extension/Preview Content\"";
+				DEVELOPMENT_TEAM = 7P35HLZ26U;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = "watchostest WatchKit Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -471,6 +486,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 7P35HLZ26U;
 				IBSC_MODULE = watchostest_WatchKit_Extension;
 				INFOPLIST_FILE = "watchostest WatchKit App/Info.plist";
 				PRODUCT_BUNDLE_IDENTIFIER = fu.watchostest.watchkitapp;
@@ -489,6 +505,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 7P35HLZ26U;
 				IBSC_MODULE = watchostest_WatchKit_Extension;
 				INFOPLIST_FILE = "watchostest WatchKit App/Info.plist";
 				PRODUCT_BUNDLE_IDENTIFIER = fu.watchostest.watchkitapp;
@@ -506,6 +523,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7P35HLZ26U;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = fu.watchostest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -518,6 +536,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7P35HLZ26U;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = fu.watchostest;
 				PRODUCT_NAME = "$(TARGET_NAME)";

@@ -32,6 +32,10 @@
 	</dict>
 	<key>WKExtensionDelegateClassName</key>
 	<string>$(PRODUCT_MODULE_NAME).ExtensionDelegate</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>AikoPlus.otf</string>
+	</array>
 	<key>WKWatchOnly</key>
 	<true/>
 </dict>
