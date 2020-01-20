@@ -1,2 +1,3 @@
 # WatchOSPlayer
-Experimental standalone media player for WatchOS
+Experimental standalone media player for watchOS
+
