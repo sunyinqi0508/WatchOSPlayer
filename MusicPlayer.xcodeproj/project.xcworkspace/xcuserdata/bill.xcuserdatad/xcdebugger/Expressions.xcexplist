@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariablesViewState
+   version = "1.0">
+   <ContextStates>
+      <ContextState
+         contextName = "closure #1 in ContentView.init():ContentView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "match.output[0].substring!.cString(using: String.Encoding.utf8)">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+   </ContextStates>
+</VariablesViewState>
