@@ -8,12 +8,20 @@
 import SwiftUI
 
 struct PlaybackView: View {
-    var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
-    }
+    
+    var placeholder: Image? = nil
+
+   var body: some View {
+           placeholder == nil ?
+               nil : placeholder!.resizable().scaledToFill()
+       
+   }
+    
     init() {}
-    init(parent:ContentView) {
-        
+    init(parent:ContentView, music: IDStr) {
+        if music.art != nil {
+            self.placeholder = music.art!
+        }
     }
 }
 

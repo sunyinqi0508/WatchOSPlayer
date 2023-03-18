@@ -35,35 +35,48 @@ class ListViewModel: ObservableObject {
 
 struct ContentView: View {
     @ObservedObject var music = ListViewModel()
+    @State var pushState = false
+    @State var geo :CGSize = .zero
+    @State var _curr_sel_music : IDStr = IDStr()
     var body: some View {
-        
-            List() {
-                ForEach(music.music) { m in
-                    
-                        Button(m.s, action: {
-                            let idx = music.music.firstIndex { s in
-                                s.s == m.s
-                            }
-                            if (idx != nil) {
-                                if (idx != 0) {
-                                    music.music = Array(music.music[idx! ... (music.music.endIndex - 1)] + music.music[0...idx! - 1])
-                                    self.player?.removeAllItems()
-                                    for i in music.music {
-                                        i.m!.seek(to: .zero)
-                                        player?.insert(i.m!, after: nil)
+        GeometryReader { geometry in
+            NavigationView(){
+                List() {
+                    ForEach(music.music) { m in
+                        VStack(){
+                            Button(m.s, action: {
+                                let idx = music.music.firstIndex { s in
+                                    s.s == m.s
+                                }
+                                if (idx != nil) {
+                                    if (idx != 0) {
+                                        music.music = Array(music.music[idx! ... (music.music.endIndex - 1)] + music.music[0...idx! - 1])
+                                        self.player?.removeAllItems()
+                                        for i in music.music {
+                                            i.m!.seek(to: .zero)
+                                            player?.insert(i.m!, after: nil)
+                                        }
+                                    }
+                                    else {
+                                        m.m!.seek(to: .zero)
                                     }
                                 }
-                                else {
-                                    m.m!.seek(to: .zero)
-                                }
-                            }
+                                pushState = true
+                                _curr_sel_music = m
+                            }).ignoresSafeArea(.all).cornerRadius(.zero).padding(.zero).frame(maxHeight: CGFloat(50)).foregroundColor(.white)
                             
-                        }).ignoresSafeArea(.all).cornerRadius(.zero).padding(.zero).frame(maxHeight: CGFloat(50)).foregroundColor(.white)
-                    
+                            NavigationLink(destination: PlaybackView(parent:self, music: _curr_sel_music), isActive: $pushState) {
+                                EmptyView()
+                            }
+                        }
                     }
-                
+                }
+            }.onAppear {
+                geo = geometry.size
             }
-    }
+        }
+        }
+     
     var player : AVQueuePlayer? = nil
     
     init() {
@@ -127,6 +140,7 @@ struct ContentView: View {
             let file_url = URL(filePath: dir + "/Documents/" + filename)
             let asset = AVAsset(url: file_url)
             let idstr = IDStr()
+            let geo = self.geo
             asset.loadMetadata(for: .iTunesMetadata) {
                 items, b in
                 for i in items! {
@@ -134,6 +148,9 @@ struct ContentView: View {
                         Task{
                             let imageData = try await i.load(.dataValue)
                             idstr.art = Image(uiImage: UIImage(data: imageData!)!)
+                            if (idstr.art != nil) {
+                                idstr.art!.resizable().scaledToFill().frame(width: geo.width, height: geo.height)
+                            }
                         }
                     }
                 }
