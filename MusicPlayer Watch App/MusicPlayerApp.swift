@@ -7,7 +7,6 @@
 
 import SwiftUI
 import WatchKit
-import UserNotifications
 
 @main
 struct MusicPlayer_Watch_AppApp: App {

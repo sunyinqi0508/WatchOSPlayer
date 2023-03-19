@@ -1,10 +1,21 @@
-#  TODO
+#  Roadmap
 
-- push to new view
-- view with media control and background
 - control menu
     - with option to delete song
     - remove all songs
     - change data source
-        - multiple datasources (smb, webdav, webserver)
-
+        - multiple datasources (smb, webdav, webserver(better regex))
+- A download view
+  - That shows files to download (can select which ones to sync)
+  - Download progress bar, pause/cancel/resume
+- Optimize Detailed Control View
+  - Use customized controls
+  - Performance tuning, reuse one view object!
+  - Volume and Seekbar
+- UI Improvements
+- Playback functions Shuffle, Stop after next song, Repeat
+- Support for multiple formats (flac, possibly others?)
+- Database for caching
+- Playlist, creation/management
+- Lyrics 
+- Tidy up code, credit page, test on real devices and submit to the appstore

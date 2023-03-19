@@ -8,6 +8,9 @@
             <PersistentString
                value = "match.output[0].substring!.cString(using: String.Encoding.utf8)">
             </PersistentString>
+            <PersistentString
+               value = "String(match.output[2].substring!)">
+            </PersistentString>
          </PersistentStrings>
       </ContextState>
    </ContextStates>

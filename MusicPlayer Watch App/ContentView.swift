@@ -33,11 +33,19 @@ class ListViewModel: ObservableObject {
    }
 }
 
+class PlaybackViewProxy {
+    var pbv : PlaybackView
+    init(v : PlaybackView) {
+        self.pbv = v
+    }
+}
+
 struct ContentView: View {
     @ObservedObject var music = ListViewModel()
     @State var pushState = false
     @State var geo :CGSize = .zero
     @State var _curr_sel_music : IDStr = IDStr()
+    let pbv : PlaybackViewProxy
     var body: some View {
         GeometryReader { geometry in
             NavigationView(){
@@ -61,18 +69,21 @@ struct ContentView: View {
                                         m.m!.seek(to: .zero)
                                     }
                                 }
+                                self._curr_sel_music = m
+                                self.pbv.pbv.update(music: _curr_sel_music)
                                 pushState = true
-                                _curr_sel_music = m
                             }).ignoresSafeArea(.all).cornerRadius(.zero).padding(.zero).frame(maxHeight: CGFloat(50)).foregroundColor(.white)
                             
-                            NavigationLink(destination: PlaybackView(parent:self, music: _curr_sel_music), isActive: $pushState) {
+                            NavigationLink(destination: self.pbv.pbv, isActive: $pushState) {
                                 EmptyView()
                             }
                         }
                     }
+                    Label("\(music.music.count) Files.    ", systemImage: "heart.fill").background(.clear).labelStyle(.titleAndIcon).frame(width: geometry.size.width, alignment: .center)
                 }
             }.onAppear {
                 geo = geometry.size
+                self.pbv.pbv.parent = self
             }
         }
         }
@@ -80,7 +91,7 @@ struct ContentView: View {
     var player : AVQueuePlayer? = nil
     
     init() {
-        print("'sibal'");
+        self.pbv = PlaybackViewProxy(v: PlaybackView())
         let base = "https://billsun.dev/webdav/music-test"
         let url = URL(string: base)
         let request: URLRequest = URLRequest(url: url!)
@@ -89,27 +100,38 @@ struct ContentView: View {
         
         session.dataTask(with: request, completionHandler:
         { (data, response, error) -> Void in
-            if (error == nil) { return }
+            if (error != nil) { return }
             let reply = String(data: data!, encoding: String.Encoding.utf8)!
             
             do {
-                let pattern  = try Regex(#".*(<a\s+href=\"(.*.m4a)\">)"#)
+                let pattern  = try Regex(#".*(<a\s+href=\"(.*.(m4a|mp3|wav))\">)"#)
                 let matched =  reply.matches(of: pattern)
                 
                 var s = Set<String>()
                 for match in matched {
                     s.insert(String(match.output[2].substring!))
                 }
-                for file in s {
+                for _file in s {
+                    var file = _file
+                    if _file.count > 68 {
+                        file = _file.removingPercentEncoding ?? _file
+                        if file.count > 36 {
+                            file = String(file.prefix(31) + file.suffix(5))
+                        }
+                    }
                     let filepath = dir + "/Documents/" + file
                     var download = true
-                    if(FileManager.default.fileExists(atPath: filepath)) {
-                        let sz = try! FileManager.default.attributesOfItem(atPath: filepath)[FileAttributeKey.size] as! UInt64
-                        download = sz < 1024
+                    let check_file =  { fpath -> Void in
+                        if(FileManager.default.fileExists(atPath: fpath)) {
+                            let sz = try! FileManager.default.attributesOfItem(atPath: fpath)[FileAttributeKey.size] as! UInt64
+                            download = sz < 40960 // (ignore files <40k)
+                        }
                     }
-                    if (download)
-                    {
-                        session.dataTask(with: URLRequest(url: URL(string: base + "/" +  file)!)) {
+                    
+                    check_file(filepath)
+                    check_file("\(dir)/Documents/\(_file)")
+                    if (download) {
+                        session.dataTask(with: URLRequest(url: URL(string: base + "/" +  _file)!)) {
                             (data, response, error) -> Void in
                             if (error == nil) {
                                 let fp = fopen(filepath, "wb")
@@ -120,7 +142,6 @@ struct ContentView: View {
                             }
                         }.resume()
                     }
-                
                 }
             }catch{}
         }
@@ -143,14 +164,15 @@ struct ContentView: View {
             let geo = self.geo
             asset.loadMetadata(for: .iTunesMetadata) {
                 items, b in
+                if (items == nil) { return }
                 for i in items! {
                     if(i.identifier == .iTunesMetadataCoverArt) {
                         Task{
                             let imageData = try await i.load(.dataValue)
                             idstr.art = Image(uiImage: UIImage(data: imageData!)!)
-                            if (idstr.art != nil) {
+                            /*if (idstr.art != nil) {
                                 idstr.art!.resizable().scaledToFill().frame(width: geo.width, height: geo.height)
-                            }
+                            }*/
                         }
                     }
                 }
