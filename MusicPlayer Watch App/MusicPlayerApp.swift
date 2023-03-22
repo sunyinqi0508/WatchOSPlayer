@@ -13,7 +13,14 @@ struct MusicPlayer_Watch_AppApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView().cornerRadius(.zero).padding(.zero)
+            ContentView().cornerRadius(.zero)
+                .padding(.zero)
+                .frame(
+                    width: WKInterfaceDevice.current().screenBounds.width,
+                    height: WKInterfaceDevice.current().screenBounds.height
+                ).tabItem {
+                    Image(systemName: "circle.fill")
+                }
         }
     }
     

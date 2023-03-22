@@ -10,7 +10,7 @@
   - Download progress bar, pause/cancel/resume
 - Optimize Detailed Control View
   - Use customized controls
-  - Performance tuning, reuse one view object!
+  - Performance tuning
   - Volume and Seekbar
 - UI Improvements
 - Playback functions Shuffle, Stop after next song, Repeat

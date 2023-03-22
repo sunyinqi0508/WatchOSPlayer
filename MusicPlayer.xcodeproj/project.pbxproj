@@ -20,7 +20,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = A95C117329C531C000737618 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = A95C117E29C531C100737618;
+			remoteGlobalTrackInfoing = A95C117E29C531C100737618;
 			remoteInfo = "MusicPlayer Watch App";
 		};
 /* End PBXContainerItemProxy section */
