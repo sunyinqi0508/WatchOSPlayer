@@ -69,6 +69,7 @@ struct PlaybackView: View {
                                         parent!.player.pause()
                                         self.playing = false
                                     } else {
+                                        parent!.player.audiovisualBackgroundPlaybackPolicy = .continuesIfPossible
                                         parent!.player.play()
                                         self.playing = true
                                     }

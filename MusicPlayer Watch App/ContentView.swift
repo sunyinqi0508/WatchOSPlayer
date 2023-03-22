@@ -188,7 +188,7 @@ struct ContentView: View {
             print(self.player.error!)
         }
         else {
-            //self.player.play()
+            self.player.play()
         }
     }
     init() {
@@ -202,7 +202,7 @@ struct ContentView: View {
         
         do {
             let session = AVAudioSession.sharedInstance()
-            try session.setCategory(AVAudioSession.Category.playback)
+            try session.setCategory(AVAudioSession.Category.playback, mode: .default, policy: .longFormAudio, options: .duckOthers)
         } catch {
             print(error)
         }
