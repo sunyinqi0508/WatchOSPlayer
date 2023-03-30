@@ -9,13 +9,16 @@ import SwiftUI
 import Network
 import AVFoundation
 import UIKit
+import WatchKit
+import MediaPlayer
 
 class TrackInfo : NSObject, Identifiable, ObservableObject {
     @Published var s : String = ""
-    @Published var art : Image? = nil
+    @Published var art : UIImage? = nil
     @Published var m : AVPlayerItem? = nil
     @Published var changed = false
     var cv : ContentView? = nil
+    var background = false
     override init() {
         super.init()
     }
@@ -37,10 +40,30 @@ class TrackInfo : NSObject, Identifiable, ObservableObject {
             self.changed = !self.changed
             return
         }
+        if (context == nil) {
+            if let change = change,
+               let keyPath = keyPath,
+               let cv = self.cv,
+               keyPath == "timeControlStatus" && self.background
+            {
+                let old = change[.oldKey] as! Int
+                let new = change[.newKey] as! Int
+                if (new == 0 && old != 0) {
+                    cv.player.playImmediately(atRate: 1)
+                }
+            }
+        }
         if let cv = self.cv {
             if let idx = cv.music.music.firstIndex(where: { s in
                 change![.newKey] as? AVPlayerItem == s.m
             }){
+                var nowPlayingInfo = [String: Any]()
+                nowPlayingInfo[MPMediaItemPropertyTitle] = self.s
+                nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = cv.player.currentItem?.duration
+                nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = cv.player.currentTime()
+                nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = cv.player.rate
+                //nowPlayingInfo[MPMediaItemPropertyArtwork] = self.art
+                MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
                 self.from(other: cv.music.music[idx])
                 cv.update_pbv(idx: idx)
             }
@@ -74,14 +97,39 @@ class PlaybackViewProxy {
 }
 
 struct ContentView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @ObservedObject var music = ListViewModel()
     @ObservedObject var nowplaying : TrackInfo
     @State var pushState = false
     @State var geo:CGSize = .zero
     @State var active = false
+    var audio_session: AVAudioSession = AVAudioSession.sharedInstance()
     //@State var _curr_sel_music : TrackInfo = TrackInfo()
     var pbv : PlaybackViewProxy
     var dir: String
+    var cc = MPRemoteCommandCenter.shared()
+    func play() {
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy:.longForm)
+            try AVAudioSession.sharedInstance().setActive(true)
+            
+            self.player.play()
+        } catch {
+            print("Error playing audio: \(error)")
+        }
+        /*do {
+            try audio_session.setCategory(AVAudioSession.Category.ambient, options: .mixWithOthers)
+            try audio_session.setActive(true)
+            audio_session.activate { _, e in
+                if e == nil {
+                    self.player.audiovisualBackgroundPlaybackPolicy = .continuesIfPossible
+                    self.player.playImmediately(atRate: 1)
+                }
+            }
+        } catch {
+            print(error)
+        }*/
+    }
     
     func update_pbv(idx: Int) {
         let m = music.music[idx]
@@ -150,6 +198,18 @@ struct ContentView: View {
                     .toolbar(.visible, for: .navigationBar)
                 
                 self.pbv.tabpbv
+                NowPlayingView().blur(radius: 0.2)
+            }
+        }.onChange(of: scenePhase) { phase in
+            switch phase {
+                case .active:
+                    self.nowplaying.background = false
+                case .inactive:
+                    self.nowplaying.background = true
+                case .background:
+                    self.nowplaying.background = true
+                default:
+                    self.nowplaying.background = true
             }
         }
         
@@ -161,7 +221,7 @@ struct ContentView: View {
         let file_url = URL(filePath: dir + "/Documents/" + filename)
         let asset = AVAsset(url: file_url)
         let track = TrackInfo()
-    
+
         asset.loadMetadata(for: .iTunesMetadata) {
             items, b in
             if (items == nil) { return }
@@ -169,7 +229,7 @@ struct ContentView: View {
                 if(i.identifier == .iTunesMetadataCoverArt) {
                     Task{
                         let imageData = try await i.load(.dataValue)
-                        track.art = Image(uiImage: UIImage(data: imageData!)!)
+                        track.art = UIImage(data: imageData!)!
                         /*if (track.art != nil) {
                             track.art!.resizable().scaledToFill().frame(width: geo.width, height: geo.height)
                         }*/
@@ -188,7 +248,7 @@ struct ContentView: View {
             print(self.player.error!)
         }
         else {
-            self.player.play()
+            //self.play()
         }
     }
     init() {
@@ -200,12 +260,6 @@ struct ContentView: View {
         self.dir = NSHomeDirectory()
         let dir = self.dir
         
-        do {
-            let session = AVAudioSession.sharedInstance()
-            try session.setCategory(AVAudioSession.Category.playback, mode: .default, policy: .longFormAudio, options: .duckOthers)
-        } catch {
-            print(error)
-        }
         self.player = AVQueuePlayer()
         self.nowplaying = TrackInfo()
         
@@ -213,11 +267,9 @@ struct ContentView: View {
         
         self.pbv.pbv.parent = self
         self.pbv.tabpbv.parent = self
-        
         self.player.audiovisualBackgroundPlaybackPolicy = .continuesIfPossible
-        
-        self.player.addObserver(self.nowplaying, forKeyPath: "currentItem",options: [.old, .new], context: &self)
-        
+        self.player.addObserver(self.nowplaying, forKeyPath: "currentItem", options: [.old, .new], context: &self)
+        self.player.addObserver(self.nowplaying, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)
         session.dataTask(with: request, completionHandler:
         { [self] (data, response, error) -> Void in
             if (error != nil) { return }
@@ -251,24 +303,7 @@ struct ContentView: View {
                     check_file(filepath)
                     check_file("\(dir)/Documents/\(_file)")
                     if (download) {
-                        var tries = 16
-                        /*
-                        func try_save_response (data: Data?, response: URLResponse?, error: Error?) -> Void {
-                            if (error == nil) {
-                                let fp = fopen(filepath, "wb")
-                                data!.withUnsafeBytes({ ptr in
-                                    fwrite(ptr, 1, data!.count, fp)
-                                })
-                                fclose(fp)
-                                add_music(filename: file)
-                            }
-                            else {
-                                if (tries > 0) {
-                                    tries -= 1
-                                    session.dataTask(with: URLRequest(url: URL(string: base + "/" +  _file)!, timeoutInterval: TimeInterval(100000 * (5 - tries))), completionHandler: try_save_response).resume()
-                                }
-                            }
-                        }*/
+                        var tries = 32
                         
                         var req = URLRequest(url: URL(string: base + "/" +  _file)!, timeoutInterval: 65536)
                         func try_download (u: URL?, r: URLResponse?, e: Error?) -> Void { // use download to avoid memory overflow
@@ -289,9 +324,6 @@ struct ContentView: View {
                             }
                         }
                         session.downloadTask(with: req, completionHandler: try_download).resume()
-                        
-                    
-                        //session.dataTask(with: URLRequest(url: URL(string: base + "/" +  _file)!, timeoutInterval: TimeInterval(65535)), completionHandler: try_save_response).resume()
                     }
                 }
             }catch{}
@@ -303,6 +335,17 @@ struct ContentView: View {
         
         self.pbv.pbv.update(music: self.nowplaying)
         self.pbv.tabpbv.update(music: self.nowplaying)
+        
+        let player = self.player
+        cc.playCommand.addTarget { _ in
+            player.play()
+            return .success
+        }
+        cc.stopCommand.addTarget { _ in
+            player.play()
+            return .success
+        }
+        
     }
     
 }

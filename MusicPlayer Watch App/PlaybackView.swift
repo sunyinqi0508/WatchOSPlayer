@@ -7,6 +7,10 @@
 
 import SwiftUI
 import UIKit
+import WatchKit
+
+let window_width = WKInterfaceDevice.current().screenBounds.width
+let window_height = WKInterfaceDevice.current().screenBounds.height
 
 class AppearTimer : ObservableObject {
     @Published var appear = false
@@ -47,19 +51,24 @@ struct PlaybackView: View {
         if trackInfo.m != nil {
             GeometryReader { geo in
                 ZStack {
-                    if(trackInfo.art == nil) {
-                        
-                        Image(systemName: "music.note")
-                            .resizable()
-                            .scaledToFit()
-                            .foregroundColor(.white)
-                            .frame(width: geo.size.width*0.84, height: geo.size.height*0.84)
-                            .padding(.leading, geo.size.width*0.08)
-                            .padding(.top, geo.size.height*0.08)
-                    }
-                    else {
-                        trackInfo.art!.resizable().scaledToFill()
-                    }
+                    ZStack{
+                        if(trackInfo.art == nil) {
+                            
+                            Image(systemName: "music.note")
+                                .resizable()
+                                .scaledToFit()
+                                .foregroundColor(.white)
+                                .frame(width: window_width*0.7, height: window_height*0.7)
+                            //.padding(.leading, window_width*0.05)
+                            //.padding(.bottom, window_height * 0.15)
+                            
+                            //.padding(.top, window_height*0.08)
+                        }
+                        else {
+                            Image(uiImage: trackInfo.art!).resizable().scaledToFill()
+                        }
+                    }.frame(width : window_width, height: window_height * 0.8)
+                        .background(appearTimer.appear ? Color.gray : Color.clear).opacity(appearTimer.appear ? 0.3 : 1).blur(radius: appearTimer.appear ? 5 : 0)
                     if (appearTimer.appear)
                     {
                         VStack {
@@ -70,8 +79,9 @@ struct PlaybackView: View {
                                         self.playing = false
                                     } else {
                                         parent!.player.audiovisualBackgroundPlaybackPolicy = .continuesIfPossible
-                                        parent!.player.play()
+                                        parent!.play()
                                         self.playing = true
+                                        appearTimer.appear()
                                     }
                                 } label: {
                                     (
@@ -81,9 +91,9 @@ struct PlaybackView: View {
                                     )
                                     .resizable()
                                     .scaledToFit()
-                                    .frame(width: geo.size.width/5.5)
+                                    .frame(width: window_width/5.5)
                                 }.background(Color(red: 0,green: 0,blue: 0,opacity: 0.2))
-                                    .frame(width: geo.size.width/2.5)
+                                    .frame(width: window_width/2.5)
                                     .cornerRadius(90, antialiased: true)
                                     .foregroundColor(.white)
                                     .opacity(1)
@@ -94,25 +104,27 @@ struct PlaybackView: View {
                                     curr!.seek(to: .zero)
                                     parent!.player.play()
                                     self.playing = true
+                                    appearTimer.appear()
                                 } label : {
                                     Image(systemName: "chevron.forward")
                                         .resizable()
                                         .scaledToFit()
-                                        .frame(width: geo.size.width/7, height: geo.size.height/7)
+                                        .frame(width: window_width/7, height: window_height/7)
                                 }.background(Color.clear)
                                     .clipShape(Circle())
                                     .foregroundColor(.white)
-                                    .frame(width: geo.size.width/4, height: geo.size.height/4)
+                                    .frame(width: window_width/4, height: window_height/4)
                                     .padding(0)
                                     .opacity(1)
                                     .buttonStyle(.plain)
                             }
-                        }
+                        }.zIndex(5)
                     }
                 }.onTapGesture {
                     appearTimer.appear()
                 }
             }.navigationBarBackButtonHidden(false)
+                .navigationTitle(trackInfo.s)
                 .toolbar(.visible, for: .navigationBar)
                 .onAppear() {
                     appearTimer.appear(time: 3, _appear: true)
