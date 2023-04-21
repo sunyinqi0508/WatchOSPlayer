@@ -17,6 +17,7 @@ class TrackInfo : NSObject, Identifiable, ObservableObject {
     @Published var art : UIImage? = nil
     @Published var m : AVPlayerItem? = nil
     @Published var changed = false
+    var filename : String = ""
     var cv : ContentView? = nil
     var background = false
     override init() {
@@ -103,14 +104,16 @@ struct ContentView: View {
     @State var pushState = false
     @State var geo:CGSize = .zero
     @State var active = false
+    @State private var selection = 1
     var audio_session: AVAudioSession = AVAudioSession.sharedInstance()
     //@State var _curr_sel_music : TrackInfo = TrackInfo()
     var pbv : PlaybackViewProxy
     var dir: String
     var cc = MPRemoteCommandCenter.shared()
+    
     func play() {
         do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy:.longForm)
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy:.longFormAudio)
             try AVAudioSession.sharedInstance().setActive(true)
             
             self.player.play()
@@ -162,20 +165,18 @@ struct ContentView: View {
     }
     var body: some View {
         NavigationStack {
-            TabView {
+            TabView (selection: $selection){
+                PlaylistView().tag(0)
                 GeometryReader { geometry in
                     List() {
                         ForEach(music.music) { m in
-                            VStack(){
-                                NavigationLink(m.s, value: m)
-                                    .ignoresSafeArea(.all)
-                                    .cornerRadius(.zero)
-                                    .padding(.zero)
-                                    .frame(maxHeight: CGFloat(50))
-                                    .foregroundColor(.white)
-                            }
+                            NavigationLink(m.s, value: m)
+                                .frame(maxHeight: CGFloat(50))
+                                .foregroundColor(.white)
+                                
                         }
                         Label("\(music.music.count) Files.    ", systemImage: "heart.fill").background(.clear).labelStyle(.titleAndIcon).frame(width: geometry.size.width, alignment: .center)
+                          
                     }
                     .navigationTitle("Songs")
                     .navigationBarBackButtonHidden(false)
@@ -196,11 +197,11 @@ struct ContentView: View {
                     } (m)
                 }.navigationBarBackButtonHidden(false)
                     .toolbar(.visible, for: .navigationBar)
-                
-                self.pbv.tabpbv
-                NowPlayingView().blur(radius: 0.2)
+                    .tag(1)
+                self.pbv.tabpbv.tag(2)
+                NowPlayingView().blur(radius: 0.16).tag(3)
             }
-        }.onChange(of: scenePhase) { phase in
+        }/*.onChange(of: scenePhase) { phase in
             switch phase {
                 case .active:
                     self.nowplaying.background = false
@@ -211,7 +212,7 @@ struct ContentView: View {
                 default:
                     self.nowplaying.background = true
             }
-        }
+        }*/
         
     }
      
@@ -229,7 +230,9 @@ struct ContentView: View {
                 if(i.identifier == .iTunesMetadataCoverArt) {
                     Task{
                         let imageData = try await i.load(.dataValue)
-                        track.art = UIImage(data: imageData!)!
+                        if let imageData = imageData {
+                            track.art = UIImage(data: imageData)
+                        }
                         /*if (track.art != nil) {
                             track.art!.resizable().scaledToFill().frame(width: geo.width, height: geo.height)
                         }*/
@@ -238,8 +241,9 @@ struct ContentView: View {
             }
         }
         let item = AVPlayerItem(url: file_url)
-        track.s = filename.prefix(filename.count - 4).removingPercentEncoding!
+        track.s = filename.prefix(filename.count - 4).removingPercentEncoding! // deal with non-3char exts, e.g. alac, flac
         track.m = item
+        track.filename = filename
         self.music.addItem(str: track)
         //item.addObserver(self, forKeyPath: "status", context: nil)
         self.player.insert(item, after: nil)
@@ -253,12 +257,13 @@ struct ContentView: View {
     }
     init() {
         self.pbv = PlaybackViewProxy()
-        let base = "https://billsun.dev/webdav/music-test"
+        let base = "http://billsuns-mbp.local"// */ "https://billsun.dev/webdav/music-test"
         let url = URL(string: base)
-        var request: URLRequest = URLRequest(url: url!)
+        let request: URLRequest = URLRequest(url: url!)
         let session = URLSession(configuration: .default)
         self.dir = NSHomeDirectory()
         let dir = self.dir
+        
         
         self.player = AVQueuePlayer()
         self.nowplaying = TrackInfo()
@@ -276,7 +281,7 @@ struct ContentView: View {
             let reply = String(data: data!, encoding: String.Encoding.utf8)!
             
             do {
-                let pattern  = try Regex(#".*(<a\s+href=\"(.*.(m4a|mp3|wav))\">)"#)
+                let pattern  = try Regex(#".*(<a\s+href=\"(.*.(m4a|mp3|wav|aac|ac3|caf|alac|aiff))\">)"#)
                 let matched =  reply.matches(of: pattern)
                 
                 var s = Set<String>()
@@ -305,7 +310,7 @@ struct ContentView: View {
                     if (download) {
                         var tries = 32
                         
-                        var req = URLRequest(url: URL(string: base + "/" +  _file)!, timeoutInterval: 65536)
+                        let req = URLRequest(url: URL(string: base + "/" +  _file)!, timeoutInterval: 65536)
                         func try_download (u: URL?, r: URLResponse?, e: Error?) -> Void { // use download to avoid memory overflow
                             if (e == nil) {
                                 do {

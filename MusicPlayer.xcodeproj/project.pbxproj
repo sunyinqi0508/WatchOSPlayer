@@ -13,6 +13,7 @@
 		A95C118929C531C300737618 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A95C118829C531C300737618 /* Assets.xcassets */; };
 		A95C118C29C531C300737618 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A95C118B29C531C300737618 /* Preview Assets.xcassets */; };
 		A982CD2A29C5BA7D00A1DBDE /* PlaybackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A982CD2929C5BA7D00A1DBDE /* PlaybackView.swift */; };
+		A99EB4CD29E48A5F00A81B51 /* PlaylistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A99EB4CC29E48A5F00A81B51 /* PlaylistView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +50,7 @@
 		A982CD2829C5907A00A1DBDE /* MusicPlayer-Watch-App-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "MusicPlayer-Watch-App-Info.plist"; sourceTree = SOURCE_ROOT; };
 		A982CD2929C5BA7D00A1DBDE /* PlaybackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackView.swift; sourceTree = "<group>"; };
 		A982CD2B29C5BE8800A1DBDE /* TODO.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TODO.md; sourceTree = "<group>"; };
+		A99EB4CC29E48A5F00A81B51 /* PlaylistView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -84,6 +86,7 @@
 			children = (
 				A982CD2829C5907A00A1DBDE /* MusicPlayer-Watch-App-Info.plist */,
 				A95C118429C531C100737618 /* MusicPlayerApp.swift */,
+				A99EB4CC29E48A5F00A81B51 /* PlaylistView.swift */,
 				A982CD2929C5BA7D00A1DBDE /* PlaybackView.swift */,
 				A95C118629C531C100737618 /* ContentView.swift */,
 				A95C118829C531C300737618 /* Assets.xcassets */,
@@ -201,6 +204,7 @@
 			files = (
 				A95C118729C531C100737618 /* ContentView.swift in Sources */,
 				A982CD2A29C5BA7D00A1DBDE /* PlaybackView.swift in Sources */,
+				A99EB4CD29E48A5F00A81B51 /* PlaylistView.swift in Sources */,
 				A95C118529C531C100737618 /* MusicPlayerApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

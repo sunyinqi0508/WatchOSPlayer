@@ -11,7 +11,7 @@ import WatchKit
 
 let window_width = WKInterfaceDevice.current().screenBounds.width
 let window_height = WKInterfaceDevice.current().screenBounds.height
-
+let sp = window_height - 0.88 * window_width
 class AppearTimer : ObservableObject {
     @Published var appear = false
     var timeout = 0
@@ -40,12 +40,11 @@ struct PlaybackView: View {
     //@ObservedObject var timeout = Timeout(timeout: 5)
     var title = ""
     
-    @State var playing = true
     @State private var appearSelf = 3
     
     @ObservedObject var appearTimer = AppearTimer()
     @ObservedObject var trackInfo : TrackInfo = TrackInfo()
-    
+    @State var showAlert : Bool = false
 
     var body: some View {
         if trackInfo.m != nil {
@@ -53,72 +52,142 @@ struct PlaybackView: View {
                 ZStack {
                     ZStack{
                         if(trackInfo.art == nil) {
-                            
                             Image(systemName: "music.note")
                                 .resizable()
                                 .scaledToFit()
                                 .foregroundColor(.white)
                                 .frame(width: window_width*0.7, height: window_height*0.7)
-                            //.padding(.leading, window_width*0.05)
-                            //.padding(.bottom, window_height * 0.15)
-                            
-                            //.padding(.top, window_height*0.08)
                         }
                         else {
                             Image(uiImage: trackInfo.art!).resizable().scaledToFill()
                         }
                     }.frame(width : window_width, height: window_height * 0.8)
-                        .background(appearTimer.appear ? Color.gray : Color.clear).opacity(appearTimer.appear ? 0.3 : 1).blur(radius: appearTimer.appear ? 5 : 0)
+                        .background(appearTimer.appear ? Color.gray : Color.clear)
+                        .opacity(appearTimer.appear ? 0.35 : 1)
+                        .blur(radius: appearTimer.appear ? 3 : 0)
+                        
                     if (appearTimer.appear)
                     {
                         VStack {
                             HStack {
                                 Button {
+                                    self.showAlert = true
+                                } label: {
+                                    Image(systemName: "trash")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .padding(.trailing, 0.07*window_width)
+                                        .frame(width:window_width/4.8 + 0.07*window_width, height: window_width/4.8)
+                                }.buttonStyle(.plain)
+                                    .alert("Sure to delete \(trackInfo.s)", isPresented: self.$showAlert) {
+                                        
+                                        Button("Confirm") {
+                                            //self.showAlert = false
+                                            parent?.player.pause()
+
+                                            do {
+                                                let tri_m = trackInfo.m
+                                                var tri_f : String? = nil
+                                                parent?.music.music.removeAll(where: { t in
+                                                    if(t.m == tri_m) {
+                                                        if let tm = tri_m {
+                                                            parent?.player.remove(tm)
+                                                            tri_f = t.filename
+                                                        }
+                                                        return true
+                                                    }
+                                                    return false
+                                                })
+                                                if let tri_f = tri_f, tri_f.trimmingCharacters(in: .whitespacesAndNewlines).count > 0 {
+                                                    try FileManager.default.removeItem(atPath: NSHomeDirectory() + "/Documents/" + tri_f
+                                                    )
+                                                }
+                                            } catch {}
+                                            parent?.player.play()
+                                        }
+                                        Button("Cancel") {
+                                            //self.showAlert = false
+                                        }
+                                        
+                                    }
+                                Button {} label: {
+                                    Image(systemName: "star")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .padding(.trailing, 0.07*window_width)
+                                        .frame(width:window_width/4.8 + 0.07*window_width, height: window_width/4.8)
+                                }.buttonStyle(.plain)
+                                Button {} label: {
+                                    Image(systemName: "pin")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width:window_width/4.8, height: window_width/4.8)
+                                }.buttonStyle(.plain)
+                                    
+                            }.frame(height: window_width * 0.3)
+                                .frame(height: window_width * 0.3)
+                                .padding(.top, window_width*0.03)
+                                .padding(.bottom, window_width*0.02)
+                            HStack {
+                                Button {
+                                    let curr = parent!.player.currentItem
+                                    
+                                    curr!.seek(to: .zero)
+                                    parent!.player.play()
+                                    appearTimer.appear()
+                                } label : {
+                                    Image(systemName: "chevron.backward")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: window_width/7, height: window_height/7)
+                                }
+                                    .frame(width: window_width/4, height: window_height/4)
+                                    .buttonStyle(.plain)
+                                    .padding(.leading, window_width * 0.03)
+                                Button {
                                     if ( parent!.player.timeControlStatus == .playing ) {
                                         parent!.player.pause()
-                                        self.playing = false
                                     } else {
                                         parent!.player.audiovisualBackgroundPlaybackPolicy = .continuesIfPossible
                                         parent!.play()
-                                        self.playing = true
                                         appearTimer.appear()
                                     }
                                 } label: {
                                     (
-                                        self.playing ?
+                                        self.parent!.player.timeControlStatus == .playing ?
                                         Image(systemName: "stop") :
                                             Image(systemName: "play")
                                     )
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: window_width/5.5)
-                                }.background(Color(red: 0,green: 0,blue: 0,opacity: 0.2))
+                                }
+                                    .padding(.leading, window_width * 0.01)
                                     .frame(width: window_width/2.5)
-                                    .cornerRadius(90, antialiased: true)
-                                    .foregroundColor(.white)
-                                    .opacity(1)
                                     .buttonStyle(.plain)
+                                
                                 Button {
                                     let curr = parent!.player.currentItem
                                     parent!.player.advanceToNextItem()
                                     curr!.seek(to: .zero)
                                     parent!.player.play()
-                                    self.playing = true
                                     appearTimer.appear()
                                 } label : {
                                     Image(systemName: "chevron.forward")
                                         .resizable()
                                         .scaledToFit()
                                         .frame(width: window_width/7, height: window_height/7)
-                                }.background(Color.clear)
-                                    .clipShape(Circle())
-                                    .foregroundColor(.white)
-                                    .frame(width: window_width/4, height: window_height/4)
-                                    .padding(0)
-                                    .opacity(1)
-                                    .buttonStyle(.plain)
-                            }
+                                }.frame(width: window_width/4, height: window_height/4)
+                                 .buttonStyle(.plain)
+                            }.padding(.trailing, window_width*0.05)
+                                .frame(height: window_width * 0.3)
+                            ProgressView(value: self.parent!.player.currentTime().seconds, total: self.parent!.player.currentItem?.duration.seconds ?? 0)
+                                .scaleEffect(x: 1, y: 0.4, anchor: .center)
+                                .padding(.top, window_width * 0.08)
+                                .padding(.bottom, window_width*0.1)
+                                .frame(width: window_width * 0.92)
                         }.zIndex(5)
+                            
                     }
                 }.onTapGesture {
                     appearTimer.appear()
@@ -129,6 +198,7 @@ struct PlaybackView: View {
                 .onAppear() {
                     appearTimer.appear(time: 3, _appear: true)
                 }
+                .transition(.opacity.animation(.easeInOut))
        }
    }
     
@@ -136,14 +206,12 @@ struct PlaybackView: View {
     init(parent:ContentView, music: TrackInfo? = nil) {
         if music != nil && music!.art != nil {
             self.parent = parent
-            self.playing = parent.player.timeControlStatus == .playing
         }
     }
     
     mutating func update (music: TrackInfo) {
         self.trackInfo.from(other: music)
         self.title = music.s
-        self.playing = self.parent!.player.timeControlStatus == .playing
     }
 }
 
