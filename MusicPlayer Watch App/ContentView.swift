@@ -105,8 +105,10 @@ struct ContentView: View {
     @State var geo:CGSize = .zero
     @State var active = false
     @State private var selection = 1
+    @State private var showButton: Bool = false
+    
     var audio_session: AVAudioSession = AVAudioSession.sharedInstance()
-    //@State var _curr_sel_music : TrackInfo = TrackInfo()
+    
     var pbv : PlaybackViewProxy
     var dir: String
     var cc = MPRemoteCommandCenter.shared()
@@ -163,29 +165,69 @@ struct ContentView: View {
             self.update_pbv(idx: idx)
         }
     }
+    
+    struct ScrollOffsetPreferenceKey: PreferenceKey {
+        static var defaultValue: CGFloat = 0
+        static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+            value = nextValue()
+        }
+    }
+    
     var body: some View {
         NavigationStack {
             TabView (selection: $selection){
                 PlaylistView().tag(0)
-                GeometryReader { geometry in
-                    List() {
-                        ForEach(music.music) { m in
-                            NavigationLink(m.s, value: m)
-                                .frame(maxHeight: CGFloat(50))
-                                .foregroundColor(.white)
-                                
-                        }
-                        Label("\(music.music.count) Files.    ", systemImage: "heart.fill").background(.clear).labelStyle(.titleAndIcon).frame(width: geometry.size.width, alignment: .center)
-                          
+                
+                ScrollView {
+                    Color.clear.frame(height: 20)
+                    if showButton {
+                        Color.clear.frame(height: 20)
+                        TextFieldLink("Add Source") { s in
+                            update_from_source(_base: s)
+                        }.autocorrectionDisabled(true)
+                            .textInputAutocapitalization(TextInputAutocapitalization.never)
+                            .animation(Animation.spring(), value:showButton)
                     }
-                    .navigationTitle("Songs")
-                    .navigationBarBackButtonHidden(false)
-                    .onAppear {
-                        self.active = true
-                        geo = geometry.size
-                        self.pbv.tabpbv.update(music: self.nowplaying)
+                    
+                    GeometryReader { geometry in
+                        Color.clear
+                            .frame(width: 0, height: 0)
+                            .padding(0)
+                            .onChange(of: geometry.frame(in: .global).minY) { value in
+                                withAnimation {
+                                    if showButton {
+                                        showButton = value > 45
+                                    }
+                                    else {
+                                        showButton = value > 60
+                                    }
+                                }
+                            }
                     }
-                }.navigationDestination(for: TrackInfo.self) { m in
+                    ForEach(Array(music.music.enumerated()), id: \.element) { i, m in
+                        NavigationLink(m.s, value: m)
+                            .buttonStyle(.plain)
+                            .frame(height: 50)
+                            .frame(maxWidth: .infinity)
+                            .padding(0)
+                            .foregroundColor(.white)
+                            .ignoresSafeArea(.all)
+                            .background(i % 2 == 0 ? Color(CGColor(red: 0.25, green: 0.71, blue: 0.92, alpha: 0.55)) : Color.clear)
+                    }
+                    Button {} label: {
+                        Label("\(music.music.count) Files.", systemImage: "heart.fill").labelStyle(.titleAndIcon).frame(alignment: .center)
+                    }.disabled(true)
+                    Color.clear.frame(height: 20)
+                }
+                .frame(height: WKInterfaceDevice.current().screenBounds.height)
+                .coordinateSpace(name: "scroll")
+                .navigationTitle("Songs")
+                .navigationBarBackButtonHidden(false)
+                .onAppear {
+                    self.active = true
+                    self.pbv.tabpbv.update(music: self.nowplaying)
+                }
+                .navigationDestination(for: TrackInfo.self) { m in
                     {
                         m -> PlaybackView in
                         if self.active {
@@ -197,11 +239,13 @@ struct ContentView: View {
                     } (m)
                 }.navigationBarBackButtonHidden(false)
                     .toolbar(.visible, for: .navigationBar)
-                    .tag(1)
+                .tag(1)
                 self.pbv.tabpbv.tag(2)
                 NowPlayingView().blur(radius: 0.16).tag(3)
             }
-        }/*.onChange(of: scenePhase) { phase in
+            
+        }
+        /*.onChange(of: scenePhase) { phase in
             switch phase {
                 case .active:
                     self.nowplaying.background = false
@@ -255,26 +299,21 @@ struct ContentView: View {
             //self.play()
         }
     }
-    init() {
-        self.pbv = PlaybackViewProxy()
-        let base = "http://billsuns-mbp.local"// */ "https://billsun.dev/webdav/music-test"
+    
+    func update_from_source (
+        _base: String =
+            /*"http://billsuns-mbp.local"// */ "https://billsun.dev/webdav/music-test"
+    ) {
+        var base = _base
+        var updated = false
+        if !base.starts(with: "http") {
+            base = "http://" + base
+        }
+
         let url = URL(string: base)
         let request: URLRequest = URLRequest(url: url!)
         let session = URLSession(configuration: .default)
-        self.dir = NSHomeDirectory()
         let dir = self.dir
-        
-        
-        self.player = AVQueuePlayer()
-        self.nowplaying = TrackInfo()
-        
-        self.nowplaying.cv = self
-        
-        self.pbv.pbv.parent = self
-        self.pbv.tabpbv.parent = self
-        self.player.audiovisualBackgroundPlaybackPolicy = .continuesIfPossible
-        self.player.addObserver(self.nowplaying, forKeyPath: "currentItem", options: [.old, .new], context: &self)
-        self.player.addObserver(self.nowplaying, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)
         session.dataTask(with: request, completionHandler:
         { [self] (data, response, error) -> Void in
             if (error != nil) { return }
@@ -335,11 +374,31 @@ struct ContentView: View {
         }
         ).resume()
         
-        let enumerator = FileManager.default.enumerator(atPath: dir + "/Documents/")
-        enumerator!.forEach({ e in add_music(filename: (e as! String))})
+
         
         self.pbv.pbv.update(music: self.nowplaying)
         self.pbv.tabpbv.update(music: self.nowplaying)
+    }
+    
+    init() {
+        self.pbv = PlaybackViewProxy()
+        self.dir = NSHomeDirectory()
+
+        self.player = AVQueuePlayer()
+        self.nowplaying = TrackInfo()
+        
+        self.nowplaying.cv = self
+        
+        self.pbv.pbv.parent = self
+        self.pbv.tabpbv.parent = self
+        self.player.audiovisualBackgroundPlaybackPolicy = .continuesIfPossible
+        self.player.addObserver(self.nowplaying, forKeyPath: "currentItem", options: [.old, .new], context: &self)
+        self.player.addObserver(self.nowplaying, forKeyPath: "timeControlStatus", options: [.old, .new], context: nil)
+        
+        update_from_source()
+        
+        let enumerator = FileManager.default.enumerator(atPath: dir + "/Documents/")
+        enumerator!.forEach({ e in add_music(filename: (e as! String))})
         
         let player = self.player
         cc.playCommand.addTarget { _ in

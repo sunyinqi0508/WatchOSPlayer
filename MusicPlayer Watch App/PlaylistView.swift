@@ -7,16 +7,26 @@
 
 import SwiftUI
 
-class IDStr : Identifiable {
+class PlaylistItem : Identifiable {
+    static func == (lhs: PlaylistItem, rhs: PlaylistItem) -> Bool {
+        return lhs.s == rhs.s
+    }
+    
     var s : String = ""
+    init(s: String) {
+        self.s = s
+    }
 }
 
 struct PlaylistView: View {
-    var playlist : Array<IDStr> = []
+    @State var playlist : Array<PlaylistItem> = []
     var body: some View {
-        List {
-            ForEach(playlist) { p in 
-                    
+        NavigationView {
+            ForEach(playlist) { p in
+                //NavigationLink(p.s, value: p)
+            }
+            TextFieldLink("Add Playlist") { s in
+                playlist.append(PlaylistItem(s: s))
             }
         }
     }

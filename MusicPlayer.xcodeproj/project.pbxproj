@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A91C247B29F2FAD00008B619 /* LocalDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91C247A29F2FAD00008B619 /* LocalDB.swift */; };
 		A95C118029C531C100737618 /* MusicPlayer Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = A95C117F29C531C100737618 /* MusicPlayer Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A95C118529C531C100737618 /* MusicPlayerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A95C118429C531C100737618 /* MusicPlayerApp.swift */; };
 		A95C118729C531C100737618 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A95C118629C531C100737618 /* ContentView.swift */; };
@@ -41,6 +42,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A91C247A29F2FAD00008B619 /* LocalDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalDB.swift; sourceTree = "<group>"; };
 		A95C117929C531C100737618 /* MusicPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MusicPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A95C117F29C531C100737618 /* MusicPlayer Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MusicPlayer Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A95C118429C531C100737618 /* MusicPlayerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicPlayerApp.swift; sourceTree = "<group>"; };
@@ -85,6 +87,7 @@
 			isa = PBXGroup;
 			children = (
 				A982CD2829C5907A00A1DBDE /* MusicPlayer-Watch-App-Info.plist */,
+				A91C247A29F2FAD00008B619 /* LocalDB.swift */,
 				A95C118429C531C100737618 /* MusicPlayerApp.swift */,
 				A99EB4CC29E48A5F00A81B51 /* PlaylistView.swift */,
 				A982CD2929C5BA7D00A1DBDE /* PlaybackView.swift */,
@@ -202,6 +205,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A91C247B29F2FAD00008B619 /* LocalDB.swift in Sources */,
 				A95C118729C531C100737618 /* ContentView.swift in Sources */,
 				A982CD2A29C5BA7D00A1DBDE /* PlaybackView.swift in Sources */,
 				A99EB4CD29E48A5F00A81B51 /* PlaylistView.swift in Sources */,

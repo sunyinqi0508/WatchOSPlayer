@@ -45,7 +45,12 @@ struct PlaybackView: View {
     @ObservedObject var appearTimer = AppearTimer()
     @ObservedObject var trackInfo : TrackInfo = TrackInfo()
     @State var showAlert : Bool = false
-
+    @State var pin : Bool = false
+    
+    func appear() -> Bool {
+        return self.pin || self.appearTimer.appear
+    }
+    
     var body: some View {
         if trackInfo.m != nil {
             GeometryReader { geo in
@@ -62,12 +67,11 @@ struct PlaybackView: View {
                             Image(uiImage: trackInfo.art!).resizable().scaledToFill()
                         }
                     }.frame(width : window_width, height: window_height * 0.8)
-                        .background(appearTimer.appear ? Color.gray : Color.clear)
-                        .opacity(appearTimer.appear ? 0.35 : 1)
-                        .blur(radius: appearTimer.appear ? 3 : 0)
+                        .background(appear() ? Color.gray : Color.clear)
+                        .opacity(appear() ? 0.35 : 1)
+                        .blur(radius: appear() ? 3 : 0)
                         
-                    if (appearTimer.appear)
-                    {
+                    if appear() {
                         VStack {
                             HStack {
                                 Button {
@@ -104,21 +108,28 @@ struct PlaybackView: View {
                                                 }
                                             } catch {}
                                             parent?.player.play()
+                                            self.appearTimer.appear()
                                         }
                                         Button("Cancel") {
                                             //self.showAlert = false
+                                            self.appearTimer.appear()
                                         }
                                         
                                     }
-                                Button {} label: {
+                                Button {
+                                    self.appearTimer.appear()
+                                } label: {
                                     Image(systemName: "star")
                                         .resizable()
                                         .scaledToFit()
                                         .padding(.trailing, 0.07*window_width)
                                         .frame(width:window_width/4.8 + 0.07*window_width, height: window_width/4.8)
                                 }.buttonStyle(.plain)
-                                Button {} label: {
-                                    Image(systemName: "pin")
+                                Button {
+                                    self.pin.toggle()
+                                    self.appearTimer.appear()
+                                } label: {
+                                    Image(systemName: self.pin ? "pin.fill" : "pin")
                                         .resizable()
                                         .scaledToFit()
                                         .frame(width:window_width/4.8, height: window_width/4.8)
@@ -182,10 +193,12 @@ struct PlaybackView: View {
                             }.padding(.trailing, window_width*0.05)
                                 .frame(height: window_width * 0.3)
                             ProgressView(value: self.parent!.player.currentTime().seconds, total: self.parent!.player.currentItem?.duration.seconds ?? 0)
+                                .progressViewStyle(.linear)
                                 .scaleEffect(x: 1, y: 0.4, anchor: .center)
                                 .padding(.top, window_width * 0.08)
                                 .padding(.bottom, window_width*0.1)
                                 .frame(width: window_width * 0.92)
+                            
                         }.zIndex(5)
                             
                     }
