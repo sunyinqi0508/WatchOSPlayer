@@ -15,21 +15,39 @@ let sp = window_height - 0.88 * window_width
 class AppearTimer : ObservableObject {
     @Published var appear = false
     var timeout = 0
+    var ts = NSDate().timeIntervalSince1970
     let lock : NSLock = NSLock()
     
     func appear(time: Int = 5, _appear: Bool = false) {
         self.lock.lock()
         self.timeout = self.timeout + time
         self.appear = timeout > 0
+        let ts = NSDate().timeIntervalSince1970
+        
         DispatchQueue.main.asyncAfter(deadline: .now().advanced(by: .seconds(time)),
             execute: {
                 self.lock.lock()
-                self.timeout -= time
-                self.appear = self.timeout > 0
+                if self.ts <= ts {
+                    self.timeout -= time
+                    self.appear = self.timeout > 0
+                }
                 self.lock.unlock()
             }
         )
         self.lock.unlock()
+    }
+    
+    func disappear() {
+        if self.appear {
+            self.lock.lock()
+            self.ts = NSDate().timeIntervalSince1970
+            self.appear = false
+            self.timeout = 0
+            self.lock.unlock()
+        }
+        else {
+            self.appear()
+        }
     }
 }
 
@@ -203,7 +221,8 @@ struct PlaybackView: View {
                             
                     }
                 }.onTapGesture {
-                    appearTimer.appear()
+                    appearTimer.disappear()
+                    //appearTimer.appear()
                 }
             }.navigationBarBackButtonHidden(false)
                 .navigationTitle(trackInfo.s)
